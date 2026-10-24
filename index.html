@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STGbot</title>
+<style>
+:root{color-scheme:dark;--bg:#000;--card:#161514;--text:#f3f0ea;--muted:#9a968e;--line:#34312d;--accent:#dd8a62;--accent-t:#1d1008;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:#000}
+body{color:var(--text);font:16px/1.6 -apple-system,"Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif}
+button{font:inherit;-webkit-tap-highlight-color:transparent}
+svg{display:block;flex:none}
+.wrap{max-width:980px;margin:0 auto;height:100%;display:flex}
+.main{flex:1;min-width:0;height:100%;display:flex;flex-direction:column}
+#side{width:96px;flex:none;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+#side .sh{padding:16px 10px;border-bottom:1px solid var(--line);font-weight:700;font-size:15px;color:var(--muted)}
+#sl{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px;font-size:14px}
+@media (min-width:640px){#side{width:260px}#side .sh{padding:18px 16px;font-size:16px}}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line)}
+header b{font-size:24px;letter-spacing:-.5px}header b span{color:var(--accent)}
+.o{display:flex;align-items:center;justify-content:center;gap:6px;background:none;border:1px solid var(--line);color:var(--text);border-radius:12px;padding:9px 12px;font-size:14px;cursor:pointer}
+.o:active,.ib:active,.rb:active,.emoji button:active{transform:scale(.94)}
+.o.on{border-color:var(--accent);color:var(--accent)}
+header .o{color:var(--muted)}
+.tools{display:flex;gap:8px;padding:8px 16px;border-bottom:1px solid var(--line)}.tools .o{flex:1}
+.ib{background:none;border:0;color:var(--muted);padding:8px;border-radius:10px;display:flex;cursor:pointer}
+.ib.on{color:var(--accent)}.ib:active{background:var(--card)}
+#log{flex:1;min-height:0;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.welcome{margin:auto;text-align:center;padding:16px 0}
+.welcome h2{font-size:26px;margin:0 0 8px}.welcome p{color:var(--muted);margin:0 0 20px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.chips span{padding:12px 18px;border:1px solid var(--line);border-radius:99px;background:var(--card);font-size:15px;cursor:pointer}
+.row{display:flex;flex-direction:column;gap:2px}.row.u{align-items:flex-end}.row.a{align-items:stretch}
+.msg{padding:10px 14px;border-radius:16px;max-width:88%;white-space:pre-wrap;word-break:break-word}
+.msg.u{background:var(--accent);color:var(--accent-t)}
+.msg.a{align-self:flex-start;background:var(--card);border:1px solid var(--line)}
+.msg.has{width:88%}
+.msg img{display:block;width:100%;background:#fff;border-radius:10px;margin-bottom:8px}
+.msg.stk{background:none;border:0;font-size:48px;line-height:1.2;padding:0}
+.att{font-size:12px;opacity:.8;margin-top:4px}
+.acts{display:flex;align-items:center;gap:2px;padding:0 2px}.acts .sp{margin-left:auto}
+.more{display:none;gap:8px;flex-wrap:wrap;padding:4px 2px}.more.on{display:flex}
+.more .o{padding:7px 12px;font-size:13px}
+.foot{border-top:1px solid var(--line)}
+.tray{display:flex;gap:6px;flex-wrap:wrap;padding:8px 16px 0}.tray:empty{display:none}
+.tray span{display:flex;align-items:center;gap:6px;font-size:13px;padding:4px 10px;border:1px solid var(--line);border-radius:99px;background:var(--card);cursor:pointer}
+.menu{display:none;gap:8px;padding:8px 16px 0}.menu.on{display:flex}
+.menu .o{flex:1;flex-direction:column;gap:4px;padding:12px 4px}
+.emoji{display:none;padding:8px 16px 0;max-height:30vh;overflow-y:auto}
+.emoji.on{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.emoji button{background:var(--card);border:1px solid var(--line);border-radius:14px;font-size:24px;padding:6px 0;cursor:pointer}
+.bar{display:flex;gap:8px;padding:12px 16px;align-items:flex-end}
+.rb{width:50px;height:50px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none}
+textarea{flex:1;min-height:50px;max-height:120px;resize:none;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--text);font:inherit}
+#go{height:50px;padding:0 22px;border:0;border-radius:14px;background:var(--accent);color:var(--accent-t);font-weight:700;cursor:pointer}#go:disabled{opacity:.5}
+#hist{display:none;position:fixed;inset:0;z-index:5;background:var(--bg);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);flex-direction:column}
+#hist.on{display:flex}
+#hist .hh{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);font-size:20px;font-weight:700}
+#hl{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:8px}
+.hi{display:flex;gap:8px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--card);cursor:pointer}
+.hi.cur{border-color:var(--accent)}.hi div{flex:1;min-width:0}.hi small{color:var(--muted);display:block}
+.hi b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sl .hi{padding:8px;gap:2px;border-radius:12px}
+#sl .hi small{display:none}
+#sl .hi b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.35}
+#sl .hi .ib{padding:2px}
+@media (min-width:640px){#sl .hi{padding:12px;gap:8px}#sl .hi small{display:block}}
+@media (max-width:639px){.bar{flex-wrap:wrap;padding:10px}.bar textarea{order:-1;flex:1 1 100%}#mic{margin-left:auto}#go{height:42px}.rb{width:42px;height:42px}}
+.hb{display:flex;gap:6px}
+header .o{padding:8px 10px;font-size:13px}
+.mut{color:var(--muted);margin:0 0 12px}
+#board{display:none;flex:1;min-height:0;overflow-y:auto;padding:16px}
+body.bd #board{display:block}
+body.bd #log,body.bd .foot{display:none}
+.inp{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--text);font:inherit}
+.bt{display:flex;gap:8px;margin-bottom:14px}
+.card{border:1px solid var(--line);border-radius:16px;background:var(--card);padding:12px;margin-bottom:12px}
+.ch{display:flex;align-items:center;gap:2px;margin-bottom:8px}
+.ch input{flex:1;min-width:0;background:none;border:0;border-bottom:1px solid transparent;color:var(--text);font:inherit;font-weight:700;font-size:17px;padding:4px 2px}
+.ch input:focus{outline:none;border-bottom-color:var(--accent)}
+.it{display:flex;align-items:flex-start;gap:2px;margin-bottom:6px}
+.it textarea{min-height:0;max-height:none;overflow:hidden;padding:7px 10px;border-radius:10px;font-size:15px;line-height:1.5;background:var(--bg)}
+.add{display:flex;gap:6px;align-items:center;margin-top:8px}
+#side .sh{display:flex;align-items:center;justify-content:space-between;gap:4px}
+#side.c{width:48px}
+#side.c .sh{justify-content:center;padding:16px 4px}
+#side.c .sh span,#side.c #sl{display:none}
+#research{display:none;flex:1;min-height:0;overflow-y:auto;padding:16px}
+body.rs #research{display:block}
+body.rs #log,body.rs .foot,body.rs #board{display:none}
+.rt{display:flex;gap:8px;margin-bottom:14px}
+.racts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.rsec h4{margin:0 0 6px;font-size:15px;color:var(--accent)}
+.rsec p{margin:0;white-space:pre-wrap;word-break:break-word;font-size:15px}
+.lock{max-width:320px;margin:40px auto;text-align:center}
+.lock h3{margin:0 0 14px}
+.lock .inp{width:100%;margin-bottom:10px;text-align:center}
+.lock .o{width:100%}
+.tools{flex-wrap:wrap}
+.tools .o{flex:1 1 auto;white-space:nowrap}
+#dlg{display:none;position:fixed;inset:0;z-index:6;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:16px}
+#dlg.on{display:flex}
+#dlg .bx{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;width:100%;max-width:320px;text-align:center}
+#dlg h3{margin:0 0 6px}
+#dlg p{margin:0 0 12px;color:var(--muted);font-size:14px}
+#dlg .inp{width:100%;margin-bottom:10px;text-align:center}
+#dlg .o{width:100%;margin-top:6px}
+.rb.on{border-color:var(--accent);color:var(--accent);animation:pl 1.2s infinite}
+@keyframes pl{0%{box-shadow:0 0 0 0 rgba(221,138,98,.5)}70%{box-shadow:0 0 0 10px rgba(221,138,98,0)}100%{box-shadow:0 0 0 0 rgba(221,138,98,0)}}
+@media (max-width:639px){#new span,#lang span,#res span{display:none}header b{font-size:20px}.hb{gap:4px}header{padding:12px}header .o{padding:8px}}
+.bar #mdl{height:50px;padding:0 14px;border-radius:25px;flex:none}
+@media (max-width:639px){.bar #mdl{height:42px;padding:0 12px}}
+.seg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+#dlg .seg .o{width:auto;margin-top:0;flex:1;padding:10px 6px;font-size:14px}
+.sbtn{display:flex;flex-direction:column;gap:6px;padding:8px;border-bottom:1px solid var(--line)}
+.sbtn .o{padding:8px 6px;font-size:12px;gap:4px;justify-content:flex-start}
+#side.c .sbtn .o span{display:none}
+#side.c .sbtn .o{justify-content:center;padding:8px 0}
+@media (min-width:640px){.sbtn .o{font-size:14px;padding:9px 12px;gap:8px}}
+.tx{white-space:pre-wrap;word-break:break-word}
+.code{background:#0b0b0b;border:1px solid var(--line);border-radius:12px;margin:8px 0;overflow:hidden;text-align:left}
+.code pre{margin:0;padding:10px 12px;overflow-x:auto;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;white-space:pre}
+.ch2{display:flex;justify-content:space-between;align-items:center;padding:2px 6px 2px 12px;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+#dlg .bx.wide{max-width:560px;max-height:82vh;overflow-y:auto;text-align:left}
+#dlg .bx.wide h3{text-align:center}
+.mimg{display:block;width:100%;background:#fff;border-radius:10px;margin:0 0 10px}
+.mitem{position:relative;margin:0 0 10px}
+.mitem .mimg{margin:0}
+.mitem .mdel{position:absolute;top:6px;right:6px;background:rgba(0,0,0,.65);color:#fff;border-radius:8px;padding:6px}
+.mitem.c .mdel{top:1px;right:40px;background:none;color:var(--muted);padding:6px}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--card);border:1px solid var(--line);padding:8px 16px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+</style>
+</head>
+<body>
+<div class="wrap">
+<aside id="side"><div class="sbtn"><button class="o" id="made" data-ic="box" data-t="만든 것"></button><button class="o" id="cmode" data-ic="code" data-t="코드 모드"></button></div><div class="sh"><span>기록</span><button class="ib" id="sideT" data-ic="panel" aria-label="기록창 접기/펴기"></button></div><div id="sl"></div></aside>
+<div class="main">
+<header><b>STG<span>bot</span></b><div class="hb"><button class="o" id="lang" data-ic="globe" aria-label="언어"></button><button class="o" id="res" data-ic="flask" data-t="연구" aria-label="연구"></button><button class="o" id="share" data-ic="share" aria-label="공유"></button><button class="o" id="new" data-ic="chatplus" data-t="새 채팅"></button></div></header>
+<div class="tools"><button class="o" id="info" data-ic="lock" data-t="정보 입수"></button><button class="o" id="login" data-ic="user" data-t="STG 로그인"></button></div>
+<div id="log">
+<div class="welcome" id="welcome">
+<h2 id="wh">STGbot이랑 게임 하실래요?</h2>
+<p>궁금한 걸 자유롭게 물어보세요</p>
+
+</div>
+</div>
+<div id="board"></div>
+<div class="foot">
+<div class="tray" id="tray"></div>
+<div class="menu" id="menu"><button class="o" data-k="cam" data-ic="camera" data-t="카메라"></button><button class="o" data-k="pho" data-ic="image" data-t="사진"></button><button class="o" data-k="fil" data-ic="file" data-t="파일"></button></div>
+
+<div class="bar"><button class="rb" id="plus" data-ic="plus"></button><button class="o" id="mdl"></button><textarea id="in" rows="1" placeholder="메시지를 입력하세요"></textarea><button class="rb" id="mic" data-ic="mic" aria-label="음성 입력"></button><button class="rb" id="vc" data-ic="wave" aria-label="음성 대화"></button><button id="go">전송</button></div>
+</div>
+</div>
+</div>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="pho" accept="image/*" multiple hidden>
+<input type="file" id="fil" accept="image/*,.txt,.md,.csv,.json,.html,.css,.js,.py,.xml,.log" multiple hidden>
+<div id="dlg"></div>
+<div id="toast"></div>
+<script>
+// ===== 독립 실행용 AI 연결 (Claude 화면 밖에서 쓰기 위한 부분) =====
+// server.js를 같은 주소에서 실행하면 '/api/chat' 그대로 두면 됩니다.
+// 서버를 다른 주소에 두었다면 그 주소로 바꾸세요. 예: 'https://내서버.com/api/chat'
+const API_URL='/api/chat';
+const blobB64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)});
+const _sample=async(input,o={})=>{
+  if(!API_URL)throw{code:'none'};
+  const messages=typeof input==='string'?[{role:'user',content:input}]:input;
+  const images=o.images?await Promise.all(o.images.map(async b=>({d:await blobB64(b),t:b.type||'image/jpeg'}))):[];
+  let r;try{r=await fetch(API_URL,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({messages,images,tier:o.modelTier||'default',effort:o.effort||'medium'})})}catch(e){throw{code:'none'}}
+  if(r.status===429)throw{code:'rate_limited'};
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||typeof j.text!=='string')throw{code:'err'};
+  if(o.onText)o.onText({text:j.text});
+  return{text:j.text};
+};
+_sample.limits=async()=>({images:true});
+const claude={use:async()=>_sample};
+// ===== 여기까지 =====
+
+const $=id=>document.getElementById(id),log=$('log'),inp=$('in'),go=$('go'),W=$('welcome'),tray=$('tray');
+const P={
+up:'<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
+down:'<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/>',
+regen:'<path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/>',
+copy:'<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+more:'<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+vol:'<path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/>',
+panel:'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/>',
+lock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+unlock:'<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>',
+box:'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
+code:'<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+cpu:'<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/>',
+globe:'<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
+mic:'<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/>',
+wave:'<path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"/>',
+user:'<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+chatplus:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M12 7v6M9 10h6"/>',
+flask:'<path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',
+smile:'<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
+x:'<path d="M18 6 6 18M6 6l12 12"/>',
+search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+edit:'<path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.4 2.6a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4Z"/>',
+camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/>',
+image:'<rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/>',
+file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
+share:'<path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="m16 6-4-4-4 4M12 2v13"/>',
+branch:'<path d="M6 3v12"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>'};
+const ic=(n,s=20)=>'<svg viewBox="0 0 24 24" width="'+s+'" height="'+s+'" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+P[n]+'</svg>';
+document.querySelectorAll('[data-ic]').forEach(b=>b.innerHTML=ic(b.dataset.ic)+(b.dataset.t?'<span>'+b.dataset.t+'</span>':''));
+const INSTR='당신은 STGbot, 친절한 한국어 AI 도우미입니다. 간결하고 자연스럽게 답하세요. 수학은 x, y가 들어간 방정식·연립방정식·함수도 단계별로 풀되 LaTeX 없이 일반 텍스트와 유니코드(², √, π)만 쓰세요. 도형이나 함수 그래프 문제는 길이·각도·좌표축과 눈금을 표시한 그림을 함께 그리세요. 그림·이미지·도형·그래프를 요청받으면 완성된 <svg viewBox="0 0 800 600"> 하나를 답변에 직접 포함하세요(스크립트·외부 링크·코드펜스 없이). 첨부된 사진과 파일 내용은 볼 수 있지만 링크(URL)는 열 수 없으니, 링크를 주면 솔직히 그렇게 말하고 내용을 붙여넣어 달라고 하세요. 모르는 것은 솔직히 말하세요.';
+let chats=[{m:[]}],cur=0,pend=[],infoMode=false;
+let user=null,ckey='stg-chats';
+try{user=localStorage.getItem('stg-user');if(user)ckey='stg-chats:'+user}catch(e){}
+try{const sv=JSON.parse(localStorage.getItem(ckey)||'null');if(sv&&sv.length){chats=sv;cur=chats.length-1}}catch(e){}
+const saveChats=()=>{try{localStorage.setItem(ckey,JSON.stringify(chats.map(c=>({rs:c.rs,m:c.m.filter(x=>!x.busy&&(x.r==='u'||x.t)).map(x=>({r:x.r,t:x.t,send:x.send,att:x.att,like:x.like}))}))))}catch(e){}};
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const toast=s=>{const t=$('toast');t.textContent=s;t.style.opacity=1;clearTimeout(toast.k);toast.k=setTimeout(()=>t.style.opacity=0,2000)};
+const strip=s=>s.replace(/```(?:svg|xml|html)?/g,'').replace(/<svg[\s\S]*?(<\/svg>|$)/i,'').trim();
+const copyText=t=>(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();const ok=document.execCommand('copy');a.remove();if(!ok)throw 0});
+function fill(b,full,done){
+  b.textContent=strip(full)||(/<svg/i.test(full)?'그리는 중…':'…');
+  const m=done&&full.match(/<svg[\s\S]*?<\/svg>/i);
+  if(m){const i=document.createElement('img');i.alt='AI가 그린 그림';i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(m[0]);b.prepend(i);b.classList.add('has')}
+}
+function acts(m,i){
+  const w=el('div'),d=el('div','acts'),more=el('div','more');
+  const mk=(n,f)=>{const b=el('button','ib');b.innerHTML=ic(n);b.onclick=()=>f(b);return b};
+  const sync=()=>{up.classList.toggle('on',m.like===1);dn.classList.toggle('on',m.like===-1)};
+  const up=mk('up',()=>{m.like=m.like===1?0:1;sync()}),dn=mk('down',()=>{m.like=m.like===-1?0:-1;sync()});sync();
+  const ms=(n,t,f)=>{const b=el('button','o');b.innerHTML=ic(n,16)+'<span>'+t+'</span>';b.onclick=f;more.appendChild(b)};
+  ms('share','공유',async()=>{const t=strip(m.t);try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e&&e.name==='AbortError')return}
+    copyText(t).then(()=>toast('답변을 복사했어요')).catch(()=>toast('공유할 수 없어요'))});
+  ms('branch','새 채팅으로 분기',()=>{chats.push({m:chats[cur].m.slice(0,i+1).map(x=>({r:x.r,t:x.t,send:x.send,att:x.att}))});cur=chats.length-1;render();toast('새 채팅으로 분기했어요')});
+  const sp=el('span','sp');
+  d.append(up,dn,mk('regen',()=>regen(i)),mk('copy',()=>copyText(strip(m.t)).then(()=>toast('복사했어요')).catch(()=>toast('복사할 수 없어요'))),mk('more',()=>more.classList.toggle('on')),sp,
+    mk('vol',()=>{try{if(speechSynthesis.speaking){speechSynthesis.cancel();return}}catch(e){}speak(m.t)}));
+  w.append(d,more);return w;
+}
+function row(m,i){
+  const r=el('div','row '+m.r),b=el('div','msg '+m.r);r.appendChild(b);m.el=b;
+  if(m.r==='u'){b.textContent=m.t;if(/^[\p{Extended_Pictographic}\uFE0F\u200D\s]+$/u.test(m.t)&&!(m.att&&m.att.length))b.classList.add('stk');
+    if(m.att&&m.att.length)b.appendChild(el('div','att','첨부: '+m.att.join(', ')))}
+  else{fill(b,m.t,!m.busy);if(!m.busy&&m.t)r.appendChild(acts(m,i))}
+  return r;
+}
+function render(){
+  [...log.querySelectorAll('.row')].forEach(n=>n.remove());
+  const c=chats[cur];const wasHidden=W.style.display==='none';W.style.display=c.m.length?'none':'';if(!c.m.length&&wasHidden)pickMsg();
+  c.m.forEach((m,i)=>log.appendChild(row(m,i)));
+  log.scrollTop=log.scrollHeight;histRender();saveChats();
+}
+function histRender(){const l=$('sl');l.innerHTML='';
+  if(chats.length===1&&!chats[0].m.length){l.appendChild(el('div',null,'아직 기록이 없어요'));return}
+  chats.forEach((c,k)=>{const d=el('div','hi'+(k===cur?' cur':'')),t=el('div'),x=el('button','ib');x.innerHTML=ic('trash',18);
+    t.append(el('b',null,(k+1)+'. '+(c.m[0]?c.m[0].t:'새 대화')),el('small',null,c.m.length+'개 메시지'));
+    x.onclick=e=>{e.stopPropagation();chats.splice(k,1);if(!chats.length)chats.push({m:[]});if(k<cur)cur--;cur=Math.min(cur,chats.length-1);render()};
+    d.onclick=()=>{cur=k;showChat();render()};
+    d.append(t,x);l.appendChild(d)})}
+function trayRender(){
+  tray.innerHTML='';
+  pend.forEach((p,i)=>{const s=el('span',null,p.label);s.insertAdjacentHTML('beforeend',ic('x',12));s.onclick=()=>{pend.splice(i,1);trayRender()};tray.appendChild(s)});
+}
+async function shrink(f){
+  try{const bm=await createImageBitmap(f),s=Math.min(1,1280/Math.max(bm.width,bm.height)),cv=document.createElement('canvas');
+    cv.width=Math.round(bm.width*s);cv.height=Math.round(bm.height*s);cv.getContext('2d').drawImage(bm,0,0,cv.width,cv.height);
+    return await new Promise(r=>cv.toBlob(r,'image/jpeg',.85))}catch(e){return f}
+}
+async function take(files){
+  for(const f of files){
+    if(f.type.startsWith('image/')){pend.push({kind:'img',label:'사진',blob:await shrink(f)})}
+    else if(/\.(pdf|docx?|xlsx?|pptx?|zip|hwp)$/i.test(f.name)){toast('이 형식은 아직 읽을 수 없어요 (텍스트 파일만 가능)')}
+    else{const t=await f.text();pend.push({kind:'file',label:f.name,name:f.name,text:t.slice(0,15000)})}
+  }
+  trayRender();
+}
+async function run(c,blobs){
+  const am={r:'a',t:'',busy:true};c.m.push(am);render();
+  try{
+    const sample=await claude.use('sample');if(!sample)throw{code:'none'};
+    const o={cache:false,modelTier:think==='max'?'complex':MD[model].t,effort:TH[think].e,onText:t=>{am.t=t.text;fill(am.el,t.text,false);log.scrollTop=log.scrollHeight}};
+    if(blobs.length){if(!(await sample.limits()).images)throw{code:'noimg'};o.images=blobs}
+    let h=c.m.slice(0,-1).map(m=>({role:m.r==='u'?'user':'assistant',content:m.send||m.t})).slice(-20);
+    if(h[0].role!=='user')h.shift();h[0]={role:'user',content:INSTR+'\n'+LR()+'\n\n'+h[0].content};
+    const r=await sample(h,o);am.t=r.text;am.busy=false;if(readOn&&speechText(am.t))speak(am.t);
+  }catch(e){
+    c.m.pop();
+    toast(e&&e.code==='none'?'이 환경에서는 AI 기능을 쓸 수 없어요':e&&e.code==='noimg'?'지금은 사진을 읽을 수 없어요':e&&e.code==='not_granted'?'AI 사용 권한이 허용되지 않았어요':e&&e.code==='rate_limited'?'사용 한도에 도달했거나 요청이 많아요. 잠시 후 다시 시도해 주세요':'오류가 발생했어요. 다시 보내 주세요');
+  }finally{go.disabled=false;if(chats[cur]===c)render();if(vcOn&&!speakingNow)setTimeout(listen,400)}
+}
+async function send(){
+  const q=inp.value.trim();if((!q&&!pend.length)||go.disabled)return;
+  try{speechSynthesis.cancel();speechSynthesis.speak(new SpeechSynthesisUtterance(' '))}catch(e){}
+  go.disabled=true;const c=chats[cur],blobs=pend.filter(p=>p.kind==='img').map(p=>p.blob);
+  const rsFirst=resMode&&!c.rs;if(resMode)c.rs=true;
+  let body=q||'첨부한 내용을 봐 주세요.';
+  if(resMode&&q&&!rsFirst)body='[연구 모드 후속 질문] 앞선 연구 대화를 이어서, 연구 도우미로서 근거와 불확실한 점을 구분해 답해 주세요. 실시간 검색은 할 수 없으니 아는 범위에서만 답하세요.\n질문: '+q;
+  else if(resMode&&q)body='[연구 요청] 다음 주제를 연구하듯 체계적으로 정리해 주세요. 개요, 핵심 쟁점, 근거와 반론, 불확실하거나 논란이 있는 점, 더 알아볼 질문 순서로 쓰고, 확실하지 않은 내용은 확실하지 않다고 표시하세요. 실시간 검색은 할 수 없으니 아는 범위에서만 답하세요.\n주제: '+q;
+  else if(infoMode&&q)body='[정보 입수 요청] 다음 주제를 핵심 요약, 배경, 알아둘 점 순서로 정리해 주세요. 확실하지 않은 내용은 확실하지 않다고 표시하세요.\n주제: '+q;
+  if(codeMode&&q)body=CODE_P+q;
+  pend.filter(p=>p.kind==='file').forEach(f=>body+='\n\n[첨부 파일: '+f.name+']\n'+f.text);
+  const um={r:'u',t:q||'(첨부)',send:body,att:pend.map(p=>p.label)};
+  c.m.push(um);pend=[];inp.value='';trayRender();
+  await run(c,blobs);
+  if(c.m[c.m.length-1]===um){c.m.pop();inp.value=q;if(chats[cur]===c)render()}
+}
+function regen(i){if(go.disabled)return;go.disabled=true;const c=chats[cur];c.m.length=i;run(c,[])}
+$('plus').onclick=()=>$('menu').classList.toggle('on');
+
+
+document.querySelectorAll('#menu button').forEach(b=>b.onclick=()=>{$(b.dataset.k).click();$('menu').classList.remove('on')});
+['cam','pho','fil'].forEach(id=>$(id).onchange=async e=>{await take([...e.target.files]);e.target.value=''});
+go.onclick=send;
+inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){e.preventDefault();send()}});
+$('new').onclick=()=>{if(!chats[cur].m.length){toast('이미 새 채팅이에요');showChat();return}chats.push({m:[]});cur=chats.length-1;showChat();render();toast('대화를 저장하고 새 채팅을 시작했어요')};
+$('share').onclick=async()=>{const m=chats[cur].m.filter(x=>!x.busy&&x.t);if(!m.length){toast('공유할 대화가 없어요');return}
+  const t=m.map(x=>(x.r==='u'?'나: '+x.t:'STGbot: '+strip(x.t))).join('\n\n');
+  try{if(navigator.share){await navigator.share({title:'STGbot 대화',text:t});return}}catch(e){if(e&&e.name==='AbortError')return}
+  copyText(t).then(()=>toast('대화를 복사했어요')).catch(()=>toast('공유할 수 없어요'))};
+let cards=[];try{cards=JSON.parse(localStorage.getItem('stg-cards')||'[]')}catch(e){}
+const save=()=>{try{localStorage.setItem('stg-cards',JSON.stringify(cards))}catch(e){}};
+const grow=t=>{t.style.height='auto';t.style.height=t.scrollHeight+'px'};
+const setInfo=on=>{$('info').classList.toggle('on',on);$('info').innerHTML=ic(on&&unlocked?'unlock':'lock')+'<span>'+(on?'채팅으로 돌아가기':'정보 입수')+'</span>'};
+const showChat=()=>{document.body.classList.remove('bd','rs');unlocked=false;setInfo(false);setRes(resMode)};
+let unlocked=false;
+const PH='c018edb6c6cd7e275391906115e9e332e4fc5a4274ba086799f5263fe294c04b';
+const sha=async s=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)))].map(b=>b.toString(16).padStart(2,'0')).join('');
+function lockRender(){
+  const B=$('board');B.innerHTML='';
+  const w=el('div','lock'),pi=el('input','inp'),ok=el('button','o',"확인");
+  pi.type='password';pi.placeholder='비밀번호';pi.autocomplete='off';
+  const tryIt=async()=>{let h='';try{h=await sha(pi.value)}catch(e){toast('이 환경에서는 잠금을 확인할 수 없어요');return}
+    if(h===PH){unlocked=true;setInfo(true);boardRender()}else{pi.value='';toast('비밀번호가 맞지 않아요')}};
+  ok.onclick=tryIt;pi.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)tryIt()};
+  w.append(el('h3',null,'비밀번호를 입력하세요'),pi,ok);B.appendChild(w);pi.focus();
+}
+function boardRender(){
+  if(!unlocked){lockRender();return}
+  const B=$('board');B.innerHTML='';
+  const bt=el('div','bt'),ni=el('input','inp'),nb=el('button','o');ni.placeholder='새 카드 제목';nb.innerHTML=ic('plus',16)+'<span>카드 추가</span>';
+  const addCard=()=>{const t=ni.value.trim();if(!t)return;cards.unshift({title:t,items:[]});save();boardRender()};
+  nb.onclick=addCard;ni.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)addCard()};
+  bt.append(ni,nb);B.appendChild(bt);
+  if(!cards.length)B.appendChild(el('p','mut','카드를 추가해 정보를 모아 보세요.'));
+  cards.forEach((c,k)=>{
+    const d=el('div','card'),h=el('div','ch'),ti=el('input'),ai=el('button','ib'),del=el('button','ib');
+    ti.value=c.title;ti.oninput=()=>{c.title=ti.value;save()};
+    ai.innerHTML=ic('search');ai.title='AI로 채우기';del.innerHTML=ic('trash');del.title='카드 삭제';
+    del.onclick=()=>{cards.splice(k,1);save();boardRender()};
+    ai.onclick=async()=>{
+      if(ai.disabled)return;ai.disabled=true;toast('AI가 정리하는 중…');
+      try{const sample=await claude.use('sample');if(!sample)throw 0;
+        const r=await sample('주제: '+c.title+'\n이 주제의 핵심 정보를 '+LANGS[lang].ai+'로 4~6개의 짧은 항목으로 정리해 주세요. 한 줄에 하나씩, 번호나 기호나 설명 없이 항목만 출력하세요. 확실하지 않은 내용은 적지 마세요.',{cache:false});
+        c.items.push(...r.text.split('\n').map(s=>s.replace(/^\s*(?:[-*•]|\d+[.)])\s*/,'').trim()).filter(Boolean).slice(0,8));
+        save();boardRender();
+      }catch(e){toast('AI로 채우지 못했어요');ai.disabled=false}
+    };
+    h.append(ti,ai,del);d.appendChild(h);
+    c.items.forEach((s,j)=>{const r=el('div','it'),t=el('textarea'),x=el('button','ib');t.rows=1;t.value=s;
+      t.oninput=()=>{c.items[j]=t.value;save();grow(t)};
+      x.innerHTML=ic('x',16);x.title='내용 삭제';x.onclick=()=>{c.items.splice(j,1);save();boardRender()};
+      r.append(t,x);d.appendChild(r)});
+    const a=el('div','add'),ii=el('input','inp'),ab=el('button','ib');ii.placeholder='내용 추가';ab.innerHTML=ic('plus');
+    const addIt=()=>{const v=ii.value.trim();if(!v)return;c.items.push(v);save();boardRender()};
+    ab.onclick=addIt;ii.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)addIt()};
+    a.append(ii,ab);d.appendChild(a);B.appendChild(d)});
+  B.querySelectorAll('.it textarea').forEach(grow);
+}
+$('info').onclick=async()=>{
+  if(document.body.classList.contains('bd')){showChat();return}
+  if(!user){toast('정보 입수는 허용된 아이디로 로그인해야 해요');openDlg();return}
+  let h='';try{h=await sha(user)}catch(e){toast('이 환경에서는 확인할 수 없어요');return}
+  if(!IA.includes(h)){toast('이 아이디는 정보 입수를 쓸 수 없어요');return}
+  document.body.classList.add('bd');document.body.classList.remove('rs');setInfo(true);setRes(false);unlocked=false;boardRender()};
+
+
+let readOn=true;
+const speak=t=>{try{const s=window.speechSynthesis;s.cancel();const u=new SpeechSynthesisUtterance(speechText(t));u.lang=LANGS[lang].sr;
+  const vs=s.getVoices().filter(x=>x.lang.toLowerCase().replace('_','-').startsWith(LANGS[lang].sr.slice(0,2))),mv=vs.find(x=>!/female|여성/i.test(x.name)&&/male|남성|남자/i.test(x.name));
+  if(mv){u.voice=mv;u.pitch=.9}else{if(vs[0])u.voice=vs[0];u.pitch=.6}
+  u.rate=.95;speakingNow=true;const my=++spk;u.onend=u.onerror=()=>{if(my!==spk)return;speakingNow=false;if(vcOn)setTimeout(listen,300)};s.speak(u)}catch(e){speakingNow=false;toast('이 기기는 읽어 주기를 지원하지 않아요')}};
+try{speechSynthesis.getVoices()}catch(e){}
+
+const side=$('side');try{if(localStorage.getItem('stg-side')==='c')side.classList.add('c')}catch(e){}
+$('sideT').onclick=()=>{const c=side.classList.toggle('c');try{localStorage.setItem('stg-side',c?'c':'o')}catch(e){}};
+let resMode=false;
+let rsTopic='',rsText='',rsBusy=false;
+const setRes=on=>{$('res').classList.toggle('on',on);$('res').innerHTML=ic('flask')+'<span>'+(on?'연구 모드 켜짐':'연구')+'</span>'};
+const RQ='당신은 꼼꼼한 연구 도우미입니다. 아래 주제를 한국어로 체계적으로 연구해 정리하세요. 반드시 다음 다섯 섹션만, 각 섹션은 "## 제목" 줄로 시작하세요: ## 개요, ## 핵심 쟁점, ## 근거와 반론, ## 불확실하거나 논란이 있는 점, ## 더 알아볼 질문. 각 섹션은 짧은 문장이나 항목으로 쓰고, 확실하지 않은 내용은 확실하지 않다고 표시하세요. 실시간 검색은 할 수 없으니 아는 범위에서만 쓰세요. 서론이나 맺음말 없이 섹션만 출력하세요.\n주제: ';
+const secs=t=>t.split(/^##\s*/m).map(s=>s.trim()).filter(Boolean).map(s=>{const i=s.indexOf('\n');return i<0?[s,'']:[s.slice(0,i).trim(),s.slice(i+1).trim()]});
+function researchRender(){
+  const R=$('research');R.innerHTML='';
+  const rt=el('div','rt'),ti=el('input','inp'),g2=el('button','o');ti.placeholder='연구할 주제를 입력하세요';ti.value=rsTopic;
+  g2.innerHTML=ic('flask',16)+'<span>연구 시작</span>';
+  const start=()=>{const t=ti.value.trim();if(t)runResearch(t)};
+  g2.onclick=start;ti.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)start()};
+  rt.append(ti,g2);R.appendChild(rt);
+  if(!rsText){R.appendChild(el('p','mut','주제를 입력하면 개요, 핵심 쟁점, 근거와 반론, 불확실한 점, 더 알아볼 질문으로 정리해 줘요. (실시간 검색은 불가, AI가 아는 범위)'));return}
+  if(!rsBusy){const ac=el('div','racts'),cp=el('button','o'),sv=el('button','o');
+    cp.innerHTML=ic('copy',16)+'<span>복사</span>';sv.innerHTML=ic('plus',16)+'<span>카드로 저장</span>';
+    cp.onclick=()=>copyText(rsText).then(()=>toast('복사했어요')).catch(()=>toast('복사할 수 없어요'));
+    sv.onclick=()=>{cards.unshift({title:rsTopic,items:secs(rsText).map(s=>s[0]+': '+s[1].replace(/\s+/g,' '))});save();toast('정보 입수 카드로 저장했어요')};
+    ac.append(cp,sv);R.appendChild(ac)}
+  secs(rsText).forEach(s=>{const d=el('div','card rsec');d.append(el('h4',null,s[0]),el('p',null,s[1]));R.appendChild(d)});
+}
+async function runResearch(t){
+  if(rsBusy)return;rsBusy=true;rsTopic=t;rsText='';researchRender();toast('연구하는 중…');
+  try{const sample=await claude.use('sample');if(!sample)throw 0;
+    const r=await sample(RQ+t,{cache:false,modelTier:'complex',onText:x=>{rsText=x.text;researchRender()}});
+    rsText=r.text;
+  }catch(e){toast('연구하지 못했어요. 다시 시도해 주세요')}
+  rsBusy=false;researchRender();
+}
+$('res').onclick=()=>{showChat();resMode=!resMode;setRes(resMode);inp.placeholder=resMode?'연구할 주제나 질문을 입력하세요':'메시지를 입력하세요';toast(resMode?'연구 모드: 주제를 보내면 정리하고, 이어서 질문하며 함께 연구해요 (실시간 검색은 불가)':'연구 모드를 껐어요');inp.focus()};
+const IDH=['b57d7e5cc921449f61d69b6e6368d2f17b4799d7cb5be2d32c3bbf81e6b15dc8','d7106ac960aa5e3bd334c07c428247d740ae5e91a318c66f4949afa45b8c0b2b','05492158e10f2c35512f1085e3c96dd81be40d01d640584cf8c87fb107416033','ede4415bcbdbe0bd324049b71606939bbb9e0c7f4e85def28f95078f4d76efbd'];
+const IA=['b57d7e5cc921449f61d69b6e6368d2f17b4799d7cb5be2d32c3bbf81e6b15dc8','ede4415bcbdbe0bd324049b71606939bbb9e0c7f4e85def28f95078f4d76efbd'];
+const setLogin=()=>{$('login').innerHTML=ic('user')+'<span>'+(user||'STG 로그인')+'</span>';$('login').classList.toggle('on',!!user)};
+const reloadChats=()=>{let sv=null;try{sv=JSON.parse(localStorage.getItem(ckey)||'null')}catch(e){}chats=sv&&sv.length?sv:[{m:[]}];cur=chats.length-1};
+function openDlg(){
+  const D=$('dlg'),b=el('div','bx'),close=el('button','o','닫기');D.innerHTML='';
+  close.onclick=()=>D.classList.remove('on');
+  if(user){
+    const out=el('button','o','로그아웃');
+    out.onclick=()=>{saveChats();user=null;ckey='stg-chats';try{localStorage.removeItem('stg-user')}catch(e){}reloadChats();setLogin();showChat();render();D.classList.remove('on');toast('로그아웃했어요')};
+    b.append(el('h3',null,user),el('p',null,'로그인 중이에요. 대화는 이 아이디로 저장돼요.'),out,close);
+  }else{
+    const ii=el('input','inp'),g2=el('button','o','로그인');ii.placeholder='아이디';ii.autocomplete='off';ii.autocapitalize='none';
+    const tryIt=async()=>{const id=ii.value.trim().toLowerCase();if(!id)return;let h='';try{h=await sha(id)}catch(e){toast('이 환경에서는 로그인을 확인할 수 없어요');return}
+      if(!IDH.includes(h)){ii.value='';toast('등록되지 않은 아이디예요');return}
+      saveChats();user=id;ckey='stg-chats:'+id;try{localStorage.setItem('stg-user',id)}catch(e){}
+      reloadChats();setLogin();showChat();render();D.classList.remove('on');toast(id+' 로그인했어요')};
+    g2.onclick=tryIt;ii.onkeydown=e=>{if(e.key==='Enter'&&!e.isComposing)tryIt()};
+    b.append(el('h3',null,'STG 로그인'),el('p',null,'받은 아이디를 입력하세요'),ii,g2,close);
+  }
+  D.appendChild(b);D.classList.add('on');
+  const f=b.querySelector('input');if(f)f.focus();
+}
+$('login').onclick=openDlg;
+$('dlg').onclick=e=>{if(e.target.id==='dlg')e.target.classList.remove('on')};
+const MD={fire:{t:'quick',d:'빠름',v:'4.5'},copter:{t:'default',d:'기본',v:'5.0'},steaus:{t:'complex',d:'정밀',v:'6.0'}};
+let model='copter';try{const m=localStorage.getItem('stg-model');if(MD[m])model=m}catch(e){}
+const TH={low:{n:'하',e:'low'},medium:{n:'중',e:'medium'},high:{n:'높음',e:'high'},max:{n:'최대',e:'high'}};
+let think='medium';try{const t=localStorage.getItem('stg-think');if(TH[t])think=t}catch(e){}
+const setModel=()=>{$('mdl').innerHTML=ic('cpu')+'<span>'+model+' '+MD[model].v+' · '+TH[think].n+'</span>'};
+function openModel(){const D=$('dlg'),b=el('div','bx');D.innerHTML='';
+  b.append(el('h3',null,'AI 모델'));
+  const row=(label,items,cur,pick)=>{const w=el('div','seg');
+    items.forEach(([k,t])=>{const x=el('button','o'+(k===cur?' on':''),t);x.onclick=()=>{pick(k);setModel();openModel()};w.appendChild(x)});
+    b.append(el('p',null,label),w)};
+  row('모델',Object.keys(MD).map(k=>[k,k+' '+MD[k].v+' · '+MD[k].d]),model,k=>{model=k;try{localStorage.setItem('stg-model',k)}catch(e){}});
+  row('생각하는 정도',Object.keys(TH).map(k=>[k,TH[k].n]),think,k=>{think=k;try{localStorage.setItem('stg-think',k)}catch(e){}});
+  b.append(el('p',null,'최대: 이 화면에서는 가장 강한 모델과 높음을 합쳐 처리해요'));
+  const c=el('button','o','닫기');c.onclick=()=>D.classList.remove('on');b.appendChild(c);
+  D.appendChild(b);D.classList.add('on')}
+$('mdl').onclick=openModel;setModel();
+let codeMode=false;
+const CODE_P='[코드 모드] 당신은 코딩 도우미입니다. 코드는 반드시 ```언어이름 코드 블록으로 쓰고, 코드 앞뒤 설명은 짧게 하세요. 코드를 직접 실행하거나 파일을 열 수는 없으니 실행 방법은 글로 알려 주세요.\n요청: ';
+function speechText(t){return t.replace(/<svg[\s\S]*?(<\/svg>|$)/gi,'').replace(/```[\s\S]*?(```|$)/g,(typeof lang!=='undefined'&&lang!=='ko')?' See the code on screen. ':' 코드는 화면에서 확인하세요. ').trim()}
+function codeBox(lg,code){const w=el('div','code'),h=el('div','ch2'),sp=el('span',null,lg||'code'),cb=el('button','ib');cb.innerHTML=ic('copy',16);cb.title='복사';
+  cb.onclick=()=>copyText(code).then(()=>toast('코드를 복사했어요')).catch(()=>toast('복사할 수 없어요'));
+  h.append(sp,cb);const pre=el('pre'),cd=el('code');cd.textContent=code;pre.appendChild(cd);w.append(h,pre);return w}
+function fill(b,full,done){
+  b.textContent='';
+  const sm=done&&full.match(/<svg[\s\S]*?<\/svg>/i);
+  if(sm){const i=document.createElement('img');i.alt='그림';i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(sm[0]);b.appendChild(i);b.classList.add('has')}
+  const t=full.replace(/```svg[\s\S]*?(```|$)/gi,'').replace(/<svg[\s\S]*?(<\/svg>|$)/gi,'');
+  let any=false;
+  t.split('```').forEach((p,i)=>{
+    if(i%2===0){const x=p.trim();if(x){any=true;const d=el('div','tx');d.textContent=x;b.appendChild(d)}}
+    else{any=true;const nl=p.indexOf('\n'),lg=nl<0?'':p.slice(0,nl).trim(),code=(nl<0?p:p.slice(nl+1)).replace(/\n$/,'');b.appendChild(codeBox(lg,code))}});
+  if(!any&&!sm)b.textContent=/<svg/i.test(full)?'그리는 중…':'…';
+}
+function madeList(){const out=[];
+  chats.forEach(c=>c.m.forEach(m=>{if(m.r!=='a'||!m.t)return;
+    (m.t.match(/<svg[\s\S]*?<\/svg>/gi)||[]).forEach(s=>out.push({k:'img',s}));
+    const t=m.t.replace(/```svg[\s\S]*?```/gi,''),re=/```([^\n`]*)\n([\s\S]*?)```/g;let x;
+    while(x=re.exec(t))out.push({k:'code',lg:x[1].trim(),code:x[2].replace(/\n$/,'')})}));
+  return out.reverse().slice(0,50)}
+function openMade(){const D=$('dlg'),b=el('div','bx wide');D.innerHTML='';
+  b.append(el('h3',null,'만든 것'));
+  const L=madeList();
+  if(!L.length)b.append(el('p',null,'아직 만든 것이 없어요. 그림이나 코드를 만들어 달라고 해 보세요.'));
+  L.forEach(it=>{if(it.k==='img'){const i=document.createElement('img');i.alt='그림';i.className='mimg';i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(it.s);b.appendChild(i)}else b.appendChild(codeBox(it.lg,it.code))});
+  const c=el('button','o','닫기');c.onclick=()=>D.classList.remove('on');b.appendChild(c);
+  D.appendChild(b);D.classList.add('on')}
+function madeList(all){const out=[];
+  chats.forEach(c=>c.m.forEach(m=>{if(m.r!=='a'||!m.t)return;
+    (m.t.match(/<svg[\s\S]*?<\/svg>/gi)||[]).forEach(s=>out.push({k:'img',s,raw:s,m}));
+    const t=m.t.replace(/```svg[\s\S]*?```/gi,''),re=/```([^\n`]*)\n([\s\S]*?)```/g;let x;
+    while(x=re.exec(t))out.push({k:'code',lg:x[1].trim(),code:x[2].replace(/\n$/,''),raw:x[0],m})}));
+  out.reverse();return all?out:out.slice(0,50)}
+function delMade(it){it.m.t=it.m.t.replace(it.raw,'');if(!it.m.t.trim())it.m.t='(삭제했어요)';render();openMade()}
+function openMade(){const D=$('dlg'),b=el('div','bx wide');D.innerHTML='';
+  b.append(el('h3',null,'만든 것'));
+  const L=madeList();
+  if(!L.length)b.append(el('p',null,'아직 만든 것이 없어요. 그림이나 코드를 만들어 달라고 해 보세요.'));
+  L.forEach(it=>{const w=el('div','mitem'+(it.k==='code'?' c':''));
+    if(it.k==='img'){const i=document.createElement('img');i.alt='그림';i.className='mimg';i.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(it.s);w.appendChild(i)}else w.appendChild(codeBox(it.lg,it.code));
+    const d=el('button','ib mdel');d.innerHTML=ic('trash',16);d.title='삭제';d.onclick=()=>delMade(it);w.appendChild(d);b.appendChild(w)});
+  if(L.length){let arm=false;const a=el('button','o','모두 삭제');
+    a.onclick=()=>{if(!arm){arm=true;a.textContent='정말 지울까요? 한 번 더 누르세요';return}
+      const all=madeList(true);all.forEach(it=>{it.m.t=it.m.t.replace(it.raw,'')});all.forEach(it=>{if(!it.m.t.trim())it.m.t='(삭제했어요)'});render();openMade()};
+    b.appendChild(a)}
+  const c=el('button','o','닫기');c.onclick=()=>D.classList.remove('on');b.appendChild(c);
+  D.appendChild(b);D.classList.add('on')}
+$('made').onclick=openMade;
+$('cmode').onclick=()=>{codeMode=!codeMode;$('cmode').classList.toggle('on',codeMode);if(codeMode&&resMode){resMode=false;setRes(false)}inp.placeholder=codeMode?'코드 질문이나 요청을 입력하세요':'메시지를 입력하세요';toast(codeMode?'코드 모드: 코드는 복사 버튼이 있는 코드 칸으로 보여줘요':'코드 모드를 껐어요')};
+setLogin();
+if(user)sha(user).then(h=>{if(!IDH.includes(h)){user=null;ckey='stg-chats';try{localStorage.removeItem('stg-user')}catch(e){}reloadChats();setLogin();render()}}).catch(()=>{});
+const WM=['STGbot이랑 게임 하실래요?','오늘은 무엇이 궁금하세요?','심심하면 끝말잇기 어때요?','수학 문제, 같이 풀어볼까요?','그리고 싶은 그림이 있나요?','오늘 하루는 어땠어요?','궁금한 건 뭐든 물어보세요!','새로운 걸 하나 배워볼까요?'];
+let wi=-1;
+function pickMsg(){let i;do{i=Math.floor(Math.random()*WM.length)}while(i===wi&&WM.length>1);wi=i;$('wh').textContent=WM[i]}
+pickMsg();
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null,listening=false,vcOn=false,speakingNow=false,spk=0,micMode='dict';
+const setVC=()=>$('vc').classList.toggle('on',vcOn);
+function listen(mode){
+  if(listening||speakingNow||go.disabled)return;
+  if(!SR){toast('이 브라우저는 음성 인식을 지원하지 않아요');vcOn=false;setVC();return}
+  micMode=typeof mode==='string'?mode:(vcOn?'vc':'dict');
+  let got=false,fatal=false;
+  try{rec=new SR();rec.lang=LANGS[lang].sr;rec.interimResults=true;rec.continuous=false;
+    rec.onstart=()=>{listening=true;$('mic').classList.add('on');toast(micMode==='vc'?'듣고 있어요…':'말씀하세요…')};
+    rec.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;inp.value=t;got=true};
+    rec.onerror=e=>{
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'||e.error==='audio-capture'){fatal=true;vcOn=false;setVC();toast('마이크를 쓸 수 없어요. 권한을 허용했는지, 이 화면에서 마이크가 막혀 있는지 확인해 주세요')}
+      else if(e.error==='network'){fatal=true;vcOn=false;setVC();toast('음성 인식 서버에 연결할 수 없어요')}};
+    rec.onend=()=>{listening=false;$('mic').classList.remove('on');
+      if(fatal||micMode!=='vc'||!vcOn)return;
+      if(got&&inp.value.trim())send();else setTimeout(listen,600)};
+    rec.start();
+  }catch(e){listening=false;vcOn=false;setVC();toast('음성 인식을 시작할 수 없어요')}
+}
+$('mic').onclick=()=>{if(listening){try{rec.stop()}catch(e){}return}if(vcOn)return;listen('dict')};
+$('vc').onclick=()=>{
+  if(vcOn){vcOn=false;setVC();try{rec&&rec.abort()}catch(e){}try{speechSynthesis.cancel()}catch(e){}toast('음성 대화를 껐어요');return}
+  if(!SR){toast('이 브라우저는 음성 인식을 지원하지 않아요');return}
+  vcOn=true;setVC();showChat();toast('음성 대화를 시작해요. 말씀하세요');listen('vc')};
+const LANGS={ko:{n:'한국어',ai:'한국어',en:'Korean',sr:'ko-KR'},en:{n:'English',ai:'영어',en:'English',sr:'en-US'},ja:{n:'日本語',ai:'일본어',en:'Japanese',sr:'ja-JP'}};
+let lang='ko';try{const l=localStorage.getItem('stg-lang');if(LANGS[l])lang=l}catch(e){}
+const LR=()=>lang==='ko'?'':'Always reply in '+LANGS[lang].en+', even though these instructions are written in Korean.';
+const T=[
+['새 채팅','New chat','新しいチャット'],['정보 입수','Info','情報収集'],['연구','Research','調査'],['연구 모드 켜짐','Research on','調査オン'],['STG 로그인','STG login','STGログイン'],
+['메시지를 입력하세요','Type a message','メッセージを入力'],['연구할 주제나 질문을 입력하세요','Enter a topic or question','テーマや質問を入力'],['전송','Send','送信'],
+['카메라','Camera','カメラ'],['사진','Photo','写真'],['파일','File','ファイル'],['기록','History','履歴'],['궁금한 걸 자유롭게 물어보세요','Ask me anything','気軽に質問してください'],
+['공유','Share','共有'],['음성 입력','Voice input','音声入力'],['음성 대화','Voice chat','音声会話'],['기록창 접기/펴기','Collapse/expand history','履歴の開閉'],['새 채팅으로 분기','Branch to new chat','新しいチャットに分岐'],
+['아직 기록이 없어요','No history yet','履歴はまだありません'],['새 대화','New chat','新しいチャット'],
+['카드 추가','Add card','カードを追加'],['새 카드 제목','New card title','新しいカードのタイトル'],['카드를 추가해 정보를 모아 보세요.','Add cards to collect information.','カードを追加して情報を集めましょう。'],
+['내용 추가','Add item','内容を追加'],['AI로 채우기','Fill with AI','AIで埋める'],['카드 삭제','Delete card','カードを削除'],['내용 삭제','Delete item','内容を削除'],['채팅으로 돌아가기','Back to chat','チャットに戻る'],
+['비밀번호를 입력하세요','Enter password','パスワー드を入力'],['비밀번호','Password','パスワード'],['확인','OK','確認'],['받은 아이디를 입력하세요','Enter your ID','IDを入力してください'],['아이디','ID','ID'],['로그인','Log in','ログイン'],['로그아웃','Log out','ログアウト'],['닫기','Close','閉じる'],
+['로그인 중이에요. 대화는 이 아이디로 저장돼요.','Logged in. Chats are saved under this ID.','ログイン中です。会話はこのIDで保存されます。'],
+['복사했어요','Copied','コピーしました'],['답변을 복사했어요','Answer copied','回答をコピーしました'],['대화를 복사했어요','Chat copied','会話をコピーしました'],['복사할 수 없어요','Can’t copy','コピーできません'],['공유할 수 없어요','Can’t share','共有できません'],['공유할 대화가 없어요','Nothing to share','共有する会話がありません'],
+['새 채팅으로 분기했어요','Branched to a new chat','新しいチャットに分岐しました'],['이미 새 채팅이에요','Already a new chat','すでに新しいチャットです'],['대화를 저장하고 새 채팅을 시작했어요','Saved and started a new chat','保存して新しいチャットを開始しました'],['로그아웃했어요','Logged out','ログアウトしました'],
+['등록되지 않은 아이디예요','ID not registered','登録されていないIDです'],['비밀번호가 맞지 않아요','Wrong password','パスワードが違います'],['정보 입수는 허용된 아이디로 로그인해야 해요','Log in with an allowed ID to use Info','情報収集は許可されたIDでログインが必要です'],['이 아이디는 정보 입수를 쓸 수 없어요','This ID can’t use Info','このIDは情報収集を使えません'],
+['듣고 있어요…','Listening…','聞いています…'],['말씀하세요…','Speak now…','話してください…'],['음성 대화를 껐어요','Voice chat off','音声会話をオフにしました'],['음성 대화를 시작해요. 말씀하세요','Voice chat started. Speak now','音声会話を開始します。話してください'],['이 브라우저는 음성 인식을 지원하지 않아요','Voice recognition isn’t supported here','このブラウザは音声認識に対応していません'],['마이크를 쓸 수 없어요. 권한을 허용했는지, 이 화면에서 마이크가 막혀 있는지 확인해 주세요','Can’t use the microphone. Check permission or whether it is blocked here','マイクを使えません。権限を確認してください'],
+['AI가 정리하는 중…','AI is working…','AIが整理中…'],['AI로 채우지 못했어요','Couldn’t fill with AI','AIで埋められませんでした'],['사용 한도에 도달했거나 요청이 많아요. 잠시 후 다시 시도해 주세요','Usage limit reached or too many requests. Try again later','利用上限に達したか、リクエストが多すぎます。しばらくして再試行してください'],['오류가 발생했어요. 다시 보내 주세요','Something went wrong. Please resend','エラーが発生しました。もう一度送信してください'],['연구 모드를 껐어요','Research mode off','調査モードをオフにしました'],['연구 모드: 주제를 보내면 정리하고, 이어서 질문하며 함께 연구해요 (실시간 검색은 불가)','Research mode: send a topic, then keep asking follow-ups (no live web search)','調査モード：テーマを送り、続けて質問できます（リアルタイム検索なし）'],['이 기기는 읽어 주기를 지원하지 않아요','Read-aloud isn’t supported','読み上げに対応していません'],
+['STGbot이랑 게임 하실래요?','Want to play a game with STGbot?','STGbotとゲームしませんか？'],['오늘은 무엇이 궁금하세요?','What are you curious about today?','今日は何が気になりますか？'],['심심하면 끝말잇기 어때요?','Bored? How about a word game?','暇なら言葉遊びはどうですか？'],['수학 문제, 같이 풀어볼까요?','Shall we solve a math problem?','数学の問題を一緒に解きませんか？'],['그리고 싶은 그림이 있나요?','Any picture you want drawn?','描いてほしい絵はありますか？'],['오늘 하루는 어땠어요?','How was your day?','今日はどんな一日でしたか？'],['궁금한 건 뭐든 물어보세요!','Ask me anything!','何でも聞いてください！'],['새로운 걸 하나 배워볼까요?','Want to learn something new?','新しいことを学びませんか？']];
+T.push(['만든 것','Creations','作ったもの'],['코드 모드','Code mode','コードモード'],['AI 모델','AI model','AIモデル'],['모델','Model','モデル'],['생각하는 정도','Thinking level','思考レベル'],
+['하','Low','低'],['중','Med','中'],['높음','High','高'],['최대','Max','最大'],
+['최대: 이 화면에서는 가장 강한 모델과 높음을 합쳐 처리해요','Max: on this screen, uses the strongest model with High','最大：この画面では最強モデルと「高」を組み合わせます'],
+['아직 만든 것이 없어요. 그림이나 코드를 만들어 달라고 해 보세요.','Nothing yet. Ask for a drawing or code.','まだありません。絵やコードを頼んでみてください。'],
+['모두 삭제','Delete all','すべて削除'],['정말 지울까요? 한 번 더 누르세요','Really delete? Tap once more','本当に削除しますか？もう一度タップ'],['삭제','Delete','削除'],['복사','Copy','コピー'],
+['코드를 복사했어요','Code copied','コードをコピーしました'],['코드 모드: 코드는 복사 버튼이 있는 코드 칸으로 보여줘요','Code mode: code appears in boxes with a copy button','コードモード：コピーボタン付きのコード欄で表示します'],
+['코드 모드를 껐어요','Code mode off','コードモードをオフにしました'],['코드 질문이나 요청을 입력하세요','Enter a code question or request','コードの質問や依頼を入力'],
+['음성 인식 서버에 연결할 수 없어요','Cannot reach the speech service','音声認識サービスに接続できません'],['음성 인식을 시작할 수 없어요','Cannot start speech recognition','音声認識を開始できません'],
+['이 형식은 아직 읽을 수 없어요 (텍스트 파일만 가능)','This format is not supported (text files only)','この形式は未対応です（テキストファイルのみ）'],
+['이 환경에서는 AI 기능을 쓸 수 없어요','AI is not available here','ここではAI機能を使えません'],['이 환경에서는 로그인을 확인할 수 없어요','Cannot verify login here','ここではログインを確認できません'],
+['이 환경에서는 잠금을 확인할 수 없어요','Cannot verify the lock here','ここではロックを確認できません'],['이 환경에서는 확인할 수 없어요','Cannot verify here','ここでは確認できません'],
+['지금은 사진을 읽을 수 없어요','Cannot read photos right now','今は写真を読み取れません'],['AI 사용 권한이 허용되지 않았어요','AI permission not granted','AIの使用が許可されていません']);
+const DD={en:{},ja:{}};T.forEach(r=>{DD.en[r[0]]=r[1];DD.ja[r[0]]=r[2]});
+const PT=[[/^(.+) · 하$/,'$1 · Low','$1 · 低'],[/^(.+) · 중$/,'$1 · Med','$1 · 中'],[/^(.+) · 높음$/,'$1 · High','$1 · 高'],[/^(.+) · 최대$/,'$1 · Max','$1 · 最大'],[/^(.+) · 빠름$/,'$1 · Fast','$1 · 高速'],[/^(.+) · 기본$/,'$1 · Default','$1 · 標準'],[/^(.+) · 정밀$/,'$1 · Precise','$1 · 高精度'],[/^(\d+)개 메시지$/,'$1 messages','$1件のメッセージ'],[/^(.+) 로그인했어요$/,'$1 logged in','$1 でログインしました']];
+const tr=s=>{if(lang==='ko')return s;const d=DD[lang],t=s.trim();if(d[t])return s.replace(t,d[t]);for(const p of PT){if(p[0].test(t))return s.replace(t,t.replace(p[0],lang==='en'?p[1]:p[2]))}return s};
+const orig=new WeakMap(),oattr=new WeakMap(),AT=['placeholder','aria-label','title'];
+let raf=0;
+const obs=new MutationObserver(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(apply)});
+function apply(){
+  obs.disconnect();
+  const w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);let n;
+  while(n=w.nextNode()){
+    const p=n.parentElement;if(!p||p.closest('.msg,textarea,script,style'))continue;
+    let o=orig.get(n);if(o===undefined){o=n.nodeValue;orig.set(n,o)}
+    const v=tr(o);if(n.nodeValue!==v)n.nodeValue=v;
+  }
+  document.querySelectorAll('[placeholder],[aria-label],[title]').forEach(e=>{
+    let m=oattr.get(e);if(!m){m={};oattr.set(e,m)}
+    AT.forEach(a=>{if(!e.hasAttribute(a))return;const cur=e.getAttribute(a);
+      if(m[a]===undefined||cur!==m[a+'t'])m[a]=cur;
+      const v=tr(m[a]);m[a+'t']=v;if(cur!==v)e.setAttribute(a,v)});
+  });
+  obs.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:AT});
+}
+const setLangBtn=()=>{$('lang').innerHTML=ic('globe')+'<span>'+lang.toUpperCase()+'</span>'};
+function openLang(){
+  const D2=$('dlg'),b=el('div','bx'),close=el('button','o','닫기');D2.innerHTML='';
+  close.onclick=()=>D2.classList.remove('on');
+  b.append(el('h3',null,'Language'));
+  Object.keys(LANGS).forEach(k=>{const x=el('button','o'+(k===lang?' on':''),LANGS[k].n);x.onclick=()=>{lang=k;try{localStorage.setItem('stg-lang',k)}catch(e){}document.documentElement.lang=k;setLangBtn();pickMsg();apply();D2.classList.remove('on')};b.appendChild(x)});
+  b.appendChild(close);D2.appendChild(b);D2.classList.add('on');
+}
+$('lang').onclick=openLang;
+setLangBtn();
+document.querySelectorAll('#chips span').forEach(c=>c.onclick=()=>{inp.value=c.textContent;send()});
+render();
+apply();
+</script>
+</body>
+</html>
