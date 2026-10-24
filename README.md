@@ -1,2 +1,0 @@
-# STGbot-steaus
-AI
